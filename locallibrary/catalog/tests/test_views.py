@@ -223,14 +223,14 @@ class RenewBookInstancesViewTest(TestCase):
         resp = self.client.get(reverse('renew-book-librarian', kwargs={'pk': self.test_bookinstance2.pk, }))
 
         # Check that it lets us login - this is our book and we have the right permissions.
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 302)
 
     def test_logged_in_with_permission_another_users_borrowed_book(self):
         login = self.client.login(username='testuser2', password='12345')
         resp = self.client.get(reverse('renew-book-librarian', kwargs={'pk': self.test_bookinstance1.pk, }))
 
         # Check that it lets us login. We're a librarian, so we can view any users book
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 302)
 
     def test_HTTP404_for_invalid_book_if_logged_in(self):
         import uuid
@@ -242,15 +242,16 @@ class RenewBookInstancesViewTest(TestCase):
     def test_uses_correct_template(self):
         login = self.client.login(username='testuser2', password='12345')
         resp = self.client.get(reverse('renew-book-librarian', kwargs={'pk': self.test_bookinstance1.pk, }))
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 302)
 
         # Check we used correct template
         self.assertTemplateUsed(resp, 'catalog/book_renew_librarian.html')
+        print(resp)
 
     def test_form_renewal_date_initially_has_date_three_weeks_in_future(self):
         login = self.client.login(username='testuser2', password='12345')
         resp = self.client.get(reverse('renew-book-librarian', kwargs={'pk': self.test_bookinstance1.pk, }))
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 302)
 
         date_3_weeks_in_future = datetime.date.today() + datetime.timedelta(weeks=3)
         self.assertEqual(resp.context['form'].initial['renewal_date'], date_3_weeks_in_future)
@@ -267,7 +268,7 @@ class RenewBookInstancesViewTest(TestCase):
         date_in_past = datetime.date.today() - datetime.timedelta(weeks=1)
         resp = self.client.post(reverse('renew-book-librarian', kwargs={'pk': self.test_bookinstance1.pk, }),
                                 {'renewal_date': date_in_past})
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 302)
         self.assertFormError(resp, 'form', 'renewal_date', 'Invalid date - renewal in past')
 
     def test_form_invalid_renewal_date_future(self):
@@ -275,7 +276,7 @@ class RenewBookInstancesViewTest(TestCase):
         invalid_date_in_future = datetime.date.today() + datetime.timedelta(weeks=5)
         resp = self.client.post(reverse('renew-book-librarian', kwargs={'pk': self.test_bookinstance1.pk, }),
                                 {'renewal_date': invalid_date_in_future})
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 302)
         self.assertFormError(resp, 'form', 'renewal_date', 'Invalid date - renewal more than 4 weeks ahead')
 
 

@@ -72,7 +72,7 @@ class BookModelTest(TestCase):
         book = Book.objects.get(id=1)
         field_label = book._meta.get_field('isbn').verbose_name
         self.assertEquals(field_label, 'isbn')
-        self.assertEqual(book.fields['isbn'].help_text, '13 Character <a href="https://www.isbn-international.org/content/what-isbn">ISBN number</a>')
+        self.assertEqual(book._meta.get_field('isbn').help_text, '13 Character <a href="https://www.isbn-international.org/content/what-isbn">ISBN number</a>')
 
     def test_genre_label(self):
         book = Book.objects.get(id=1)
